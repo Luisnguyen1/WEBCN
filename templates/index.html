@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tài khoản</title>
+</head>
+<body>
+    <h1>Đăng ký tài khoản</h1>
+    
+    <div id="registerForm">
+        <h2>Bước 1: Nhập thông tin</h2>
+        <form id="regForm">
+            <label>Tên:</label><br>
+            <input type="text" id="name" required><br><br>
+            <label>Email:</label><br>
+            <input type="email" id="email" required><br><br>
+            <label>Mật khẩu:</label><br>
+            <input type="password" id="password" required><br><br>
+            <button type="submit">Gửi OTP</button>
+        </form>
+    </div>
+
+    <div id="verifyForm" style="display:none;">
+        <h2>Bước 2: Nhập mã OTP</h2>
+        <form id="otpForm">
+            <label>Mã OTP (đã gửi về email):</label><br>
+            <input type="text" id="otp" required><br><br>
+            <button type="submit">Xác nhận</button>
+        </form>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        let userEmail = '';
+
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            userEmail = email;
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('password', password);
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+            document.getElementById('message').innerText = text;
+
+            if (response.ok) {
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('verifyForm').style.display = 'block';
+            }
+        });
+
+        document.getElementById('otpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const otp = document.getElementById('otp').value;
+
+            const formData = new FormData();
+            formData.append('email', userEmail);
+            formData.append('otp', otp);
+
+            const response = await fetch('/verify', {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+            document.getElementById('message').innerText = text;
+
+            if (response.ok) {
+                document.getElementById('verifyForm').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
